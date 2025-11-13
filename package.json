@@ -1,7 +1,12 @@
-"scripts":
 {
-	"start": "node server.js"
-},
-"main": "server.js"
-
-
+  "name": "nature-explorer",
+  "version": "1.0.0",
+  "description": "A 3D nature exploration game with procedural trees",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "three": "^0.160.0"
+  }
+}
