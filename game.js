@@ -14,12 +14,12 @@ const gameState = {
 
 // Scene setup
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xa8c5dd);
-scene.fog = new THREE.Fog(0xa8c5dd, 30, 250);
+scene.background = new THREE.Color(0xadd8e6);
+scene.fog = new THREE.Fog(0xadd8e6, 20, 200);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 1.7, 5);
+camera.position.set(0, 1.7, 10);
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -27,15 +27,15 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
+renderer.toneMappingExposure = 1.5;
 document.body.appendChild(renderer.domElement);
 
-// Enhanced Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+// Powerful lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
 scene.add(ambientLight);
 
-const sunLight = new THREE.DirectionalLight(0xfff4e0, 3.5);
-sunLight.position.set(100, 140, 80);
+const sunLight = new THREE.DirectionalLight(0xfff8e1, 4.0);
+sunLight.position.set(120, 150, 100);
 sunLight.castShadow = true;
 sunLight.shadow.camera.left = -150;
 sunLight.shadow.camera.right = 150;
@@ -43,65 +43,19 @@ sunLight.shadow.camera.top = 150;
 sunLight.shadow.camera.bottom = -150;
 sunLight.shadow.mapSize.width = 4096;
 sunLight.shadow.mapSize.height = 4096;
-sunLight.shadow.bias = -0.0002;
+sunLight.shadow.bias = -0.0001;
 scene.add(sunLight);
 
-const fillLight = new THREE.DirectionalLight(0xb4d4ff, 1.2);
-fillLight.position.set(-80, 60, -60);
-scene.add(fillLight);
+const fillLight1 = new THREE.DirectionalLight(0xb0d0f0, 1.8);
+fillLight1.position.set(-100, 80, -80);
+scene.add(fillLight1);
 
-const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x4a5236, 1.5);
+const fillLight2 = new THREE.DirectionalLight(0xffeaa7, 1.2);
+fillLight2.position.set(50, 60, -100);
+scene.add(fillLight2);
+
+const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x4a5020, 2.0);
 scene.add(hemiLight);
-
-// Create high-contrast bark texture
-function createBarkTexture(seed) {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-    const rng = seededRandom(seed);
-
-    // Much darker base for contrast
-    ctx.fillStyle = '#2a1810';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Add strong vertical bark lines
-    for (let i = 0; i < 50; i++) {
-        const x = (i / 50) * canvas.width;
-        ctx.strokeStyle = `rgba(${15 + rng() * 20}, ${10 + rng() * 10}, ${8 + rng() * 8}, 0.9)`;
-        ctx.lineWidth = 3 + rng() * 5;
-        ctx.beginPath();
-
-        for (let y = 0; y < canvas.height; y += 2) {
-            const wobble = Math.sin(y * 0.03 + rng() * 10) * 15;
-            ctx.lineTo(x + wobble, y);
-        }
-        ctx.stroke();
-    }
-
-    // Add bark detail patches
-    for (let i = 0; i < 1000; i++) {
-        const x = rng() * canvas.width;
-        const y = rng() * canvas.height;
-        const w = 4 + rng() * 10;
-        const h = 10 + rng() * 30;
-        ctx.fillStyle = `rgba(${20 + rng() * 25}, ${15 + rng() * 15}, ${10 + rng() * 10}, ${0.4 + rng() * 0.5})`;
-        ctx.fillRect(x, y, w, h);
-    }
-
-    // Add highlights for depth
-    for (let i = 0; i < 300; i++) {
-        const x = rng() * canvas.width;
-        const y = rng() * canvas.height;
-        ctx.fillStyle = `rgba(${100 + rng() * 60}, ${70 + rng() * 40}, ${40 + rng() * 30}, ${0.15 + rng() * 0.25})`;
-        ctx.fillRect(x, y, 2 + rng() * 4, 4 + rng() * 12);
-    }
-
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    return texture;
-}
 
 function seededRandom(seed) {
     let s = seed;
@@ -111,63 +65,98 @@ function seededRandom(seed) {
     };
 }
 
-// Create leaf texture for better visibility
-function createLeafTexture() {
+// High quality bark texture
+function createRealisticBarkTexture(seed) {
     const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = 1024;
+    canvas.height = 2048;
     const ctx = canvas.getContext('2d');
+    const rng = seededRandom(seed);
 
-    // Leaf shape
-    ctx.fillStyle = '#2d5016';
-    ctx.beginPath();
-    ctx.ellipse(64, 64, 60, 60, 0, 0, Math.PI * 2);
-    ctx.fill();
+    // Very dark base
+    ctx.fillStyle = '#1a0f08';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Darker edges
-    ctx.strokeStyle = '#1a3010';
-    ctx.lineWidth = 8;
-    ctx.stroke();
+    // Major bark ridges
+    for (let i = 0; i < 80; i++) {
+        const x = (i / 80) * canvas.width + (rng() - 0.5) * 30;
+
+        ctx.strokeStyle = `rgba(${10 + rng() * 20}, ${8 + rng() * 12}, ${5 + rng() * 8}, ${0.7 + rng() * 0.3})`;
+        ctx.lineWidth = 5 + rng() * 8;
+        ctx.beginPath();
+
+        for (let y = 0; y < canvas.height; y += 1) {
+            const wobble = Math.sin(y * 0.02 + rng() * 10) * 20 + Math.sin(y * 0.05) * 10;
+            ctx.lineTo(x + wobble, y);
+        }
+        ctx.stroke();
+    }
+
+    // Texture details
+    for (let i = 0; i < 2000; i++) {
+        const x = rng() * canvas.width;
+        const y = rng() * canvas.height;
+        const w = 4 + rng() * 15;
+        const h = 12 + rng() * 40;
+        ctx.fillStyle = `rgba(${25 + rng() * 30}, ${18 + rng() * 20}, ${12 + rng() * 15}, ${0.3 + rng() * 0.6})`;
+        ctx.fillRect(x, y, w, h);
+    }
+
+    // Highlights and cracks
+    for (let i = 0; i < 500; i++) {
+        const x = rng() * canvas.width;
+        const y = rng() * canvas.height;
+        const brightness = rng() > 0.5;
+
+        if (brightness) {
+            ctx.fillStyle = `rgba(${120 + rng() * 80}, ${90 + rng() * 60}, ${50 + rng() * 40}, ${0.1 + rng() * 0.3})`;
+        } else {
+            ctx.fillStyle = `rgba(5, 3, 2, ${0.6 + rng() * 0.4})`;
+        }
+        ctx.fillRect(x, y, 2 + rng() * 5, 5 + rng() * 15);
+    }
 
     const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
     return texture;
 }
 
-const leafTexture = createLeafTexture();
-
-// Highly detailed photorealistic tree
-class PhotorealisticTree {
+// Realistic tree class
+class RealisticForestTree {
     constructor(x, z, seed = Math.random()) {
         this.group = new THREE.Group();
         this.seed = seed;
         this.random = seededRandom(seed);
 
-        const trunkHeight = 18 + this.random() * 12;
-        const trunkRadius = 0.6 + this.random() * 0.5;
+        const trunkHeight = 20 + this.random() * 15;
+        const trunkRadius = 0.7 + this.random() * 0.6;
 
-        const barkTexture = createBarkTexture(seed);
+        const barkTexture = createRealisticBarkTexture(seed);
 
+        // High quality bark material
         this.barkMaterial = new THREE.MeshStandardMaterial({
             map: barkTexture,
-            roughness: 0.95,
+            roughness: 0.98,
             metalness: 0.0,
-            color: 0xcccccc  // Lighter multiplier to show texture better
+            color: 0xffffff
         });
 
-        this.createDetailedTrunk(trunkHeight, trunkRadius);
-        this.createDetailedBranches(trunkHeight, trunkRadius);
-        this.createRealisticCanopy(trunkHeight);
+        this.createHighQualityTrunk(trunkHeight, trunkRadius);
+        this.createNaturalBranches(trunkHeight, trunkRadius);
+        this.createScatteredFoliage(trunkHeight);
 
         this.group.position.set(x, 0, z);
     }
 
-    createDetailedTrunk(height, radius) {
+    createHighQualityTrunk(height, radius) {
+        // Very high detail trunk
         const geometry = new THREE.CylinderGeometry(
-            radius * 0.65,
-            radius * 1.3,
+            radius * 0.6,
+            radius * 1.4,
             height,
-            20,
-            24
+            32,
+            32
         );
 
         const positions = geometry.attributes.position;
@@ -175,16 +164,17 @@ class PhotorealisticTree {
             const y = positions.getY(i);
             const heightRatio = (y + height / 2) / height;
 
-            if (heightRatio > 0.05) {
+            if (heightRatio > 0.03) {
                 const x = positions.getX(i);
                 const z = positions.getZ(i);
                 const angle = Math.atan2(z, x);
 
-                const noise = (this.random() - 0.5) * 0.12 * radius;
-                const bump = Math.sin(heightRatio * 12 + angle * 3) * 0.08 * radius;
+                const noise = (this.random() - 0.5) * 0.15 * radius;
+                const bump = Math.sin(heightRatio * 15 + angle * 4) * 0.1 * radius;
+                const knot = Math.sin(heightRatio * 8 + this.random() * 10) * 0.08 * radius;
 
-                positions.setX(i, x + Math.cos(angle) * (noise + bump));
-                positions.setZ(i, z + Math.sin(angle) * (noise + bump));
+                positions.setX(i, x + Math.cos(angle) * (noise + bump + knot));
+                positions.setZ(i, z + Math.sin(angle) * (noise + bump + knot));
             }
         }
         geometry.computeVertexNormals();
@@ -195,28 +185,28 @@ class PhotorealisticTree {
         trunk.receiveShadow = true;
         this.group.add(trunk);
 
-        this.createVisibleRoots(radius);
+        this.createLargeRoots(radius, height);
     }
 
-    createVisibleRoots(trunkRadius) {
-        const numRoots = 5 + Math.floor(this.random() * 3);
+    createLargeRoots(trunkRadius, trunkHeight) {
+        const numRoots = 6 + Math.floor(this.random() * 4);
 
         for (let i = 0; i < numRoots; i++) {
-            const angle = (i / numRoots) * Math.PI * 2 + this.random() * 1;
-            const rootLength = trunkRadius * (3 + this.random() * 2);
+            const angle = (i / numRoots) * Math.PI * 2 + this.random() * 1.2;
+            const rootLength = trunkRadius * (3.5 + this.random() * 2.5);
 
             const geometry = new THREE.CylinderGeometry(
-                trunkRadius * 0.12,
-                trunkRadius * 0.5,
+                trunkRadius * 0.1,
+                trunkRadius * 0.6,
                 rootLength,
-                10
+                16
             );
 
             const root = new THREE.Mesh(geometry, this.barkMaterial);
-            root.position.y = rootLength * 0.15;
-            root.position.x = Math.cos(angle) * trunkRadius * 0.5;
-            root.position.z = Math.sin(angle) * trunkRadius * 0.5;
-            root.rotation.z = Math.PI / 2.3 + this.random() * 0.5;
+            root.position.y = rootLength * 0.1;
+            root.position.x = Math.cos(angle) * trunkRadius * 0.4;
+            root.position.z = Math.sin(angle) * trunkRadius * 0.4;
+            root.rotation.z = Math.PI / 2.2 + this.random() * 0.6;
             root.rotation.y = angle;
             root.castShadow = true;
             root.receiveShadow = true;
@@ -225,40 +215,40 @@ class PhotorealisticTree {
         }
     }
 
-    createDetailedBranches(trunkHeight, trunkRadius) {
-        const numMainBranches = 7 + Math.floor(this.random() * 6);
-        const startHeight = trunkHeight * 0.4;
+    createNaturalBranches(trunkHeight, trunkRadius) {
+        const numMainBranches = 8 + Math.floor(this.random() * 8);
+        const startHeight = trunkHeight * 0.35;
 
         for (let i = 0; i < numMainBranches; i++) {
             const ratio = i / numMainBranches;
             const branchY = startHeight + (trunkHeight - startHeight) * ratio;
-            const angle = (i / numMainBranches) * Math.PI * 2 + this.random() * 1.4;
+            const angle = (i / numMainBranches) * Math.PI * 2 + this.random() * 1.5;
 
-            this.createBranch(branchY, angle, trunkRadius * 0.6, 0, trunkHeight);
+            this.createBranch(branchY, angle, trunkRadius * 0.55, 0, trunkHeight);
         }
     }
 
     createBranch(startY, angle, radius, depth, trunkHeight) {
-        if (depth > 3) return;
+        if (depth > 4) return;
 
-        const length = (4 - depth) * (3 + this.random() * 2.5);
-        const branchRadius = radius * (0.55 - depth * 0.1);
+        const length = (5 - depth) * (3.5 + this.random() * 2.8);
+        const branchRadius = radius * (0.5 - depth * 0.08);
 
         const geometry = new THREE.CylinderGeometry(
-            branchRadius * 0.4,
+            branchRadius * 0.35,
             branchRadius,
             length,
-            12
+            16
         );
 
         const branch = new THREE.Mesh(geometry, this.barkMaterial);
-        const tilt = Math.PI / 4 + this.random() * Math.PI / 7;
+        const tilt = Math.PI / 3.8 + this.random() * Math.PI / 6;
 
         branch.position.y = startY;
         branch.rotation.z = tilt;
         branch.rotation.y = angle;
 
-        const radiusAtHeight = radius * (1 - (startY / trunkHeight) * 0.35);
+        const radiusAtHeight = radius * (1 - (startY / trunkHeight) * 0.3);
         branch.position.x = Math.cos(angle) * radiusAtHeight;
         branch.position.z = Math.sin(angle) * radiusAtHeight;
 
@@ -272,69 +262,63 @@ class PhotorealisticTree {
         branch.receiveShadow = true;
         this.group.add(branch);
 
-        if (depth < 3) {
-            const numSubs = depth === 0 ? 3 + Math.floor(this.random() * 3) : 2 + Math.floor(this.random() * 2);
+        if (depth < 4) {
+            const numSubs = depth === 0 ? 4 + Math.floor(this.random() * 3) :
+                           depth === 1 ? 3 + Math.floor(this.random() * 2) :
+                           2 + Math.floor(this.random() * 2);
+
             for (let i = 0; i < numSubs; i++) {
-                const subAngle = angle + (this.random() - 0.5) * Math.PI / 1.5;
-                const endY = startY + Math.sin(tilt) * length * (0.6 + this.random() * 0.35);
+                const subAngle = angle + (this.random() - 0.5) * Math.PI / 1.3;
+                const endY = startY + Math.sin(tilt) * length * (0.5 + this.random() * 0.4);
                 this.createBranch(endY, subAngle, branchRadius, depth + 1, trunkHeight);
             }
         }
     }
 
-    createRealisticCanopy(trunkHeight) {
+    createScatteredFoliage(trunkHeight) {
         const leafColors = [
-            0x2d5016, 0x3a6b1f, 0x4d7c26,
-            0x2a4a15, 0x355e1a, 0x416d20,
-            0x38621d, 0x2f5518
+            0x2d5016, 0x3a6b1f, 0x4d7c26, 0x2a4a15,
+            0x355e1a, 0x416d20, 0x38621d, 0x2f5518,
+            0x426e21, 0x314f19
         ];
 
-        // Create larger leaf groups for better appearance
-        const numGroups = 35 + Math.floor(this.random() * 30);
+        // Create MANY individual leaves scattered naturally
+        const numLeaves = 400 + Math.floor(this.random() * 300);
 
-        for (let g = 0; g < numGroups; g++) {
-            const groupAngle = this.random() * Math.PI * 2;
-            const groupDist = this.random() * 8;
-            const groupHeight = trunkHeight * (0.5 + this.random() * 0.48);
+        for (let i = 0; i < numLeaves; i++) {
+            const angle = this.random() * Math.PI * 2;
+            const distance = this.random() * 10;
+            const height = trunkHeight * (0.45 + this.random() * 0.5);
 
-            // Create a visible cluster
-            const clusterSize = 8 + Math.floor(this.random() * 12);
+            // Vary leaf sizes
+            const size = 0.8 + this.random() * 1.2;
 
-            for (let i = 0; i < clusterSize; i++) {
-                const size = 1.2 + this.random() * 1.5;
-                const leafGeom = new THREE.PlaneGeometry(size, size * 1.4);
+            const leafGeom = new THREE.PlaneGeometry(size, size * 1.6);
 
-                const leafMat = new THREE.MeshStandardMaterial({
-                    color: leafColors[Math.floor(this.random() * leafColors.length)],
-                    map: leafTexture,
-                    roughness: 0.85,
-                    metalness: 0.0,
-                    side: THREE.DoubleSide,
-                    transparent: true,
-                    alphaTest: 0.1
-                });
+            const leafMat = new THREE.MeshStandardMaterial({
+                color: leafColors[Math.floor(this.random() * leafColors.length)],
+                roughness: 0.9,
+                metalness: 0.0,
+                side: THREE.DoubleSide
+            });
 
-                const leaf = new THREE.Mesh(leafGeom, leafMat);
+            const leaf = new THREE.Mesh(leafGeom, leafMat);
 
-                const localAngle = (i / clusterSize) * Math.PI * 2;
-                const localRad = this.random() * 2;
+            leaf.position.set(
+                Math.cos(angle) * distance,
+                height + (this.random() - 0.5) * 4,
+                Math.sin(angle) * distance
+            );
 
-                leaf.position.set(
-                    Math.cos(groupAngle) * groupDist + Math.cos(localAngle) * localRad,
-                    groupHeight + (this.random() - 0.5) * 3,
-                    Math.sin(groupAngle) * groupDist + Math.sin(localAngle) * localRad
-                );
+            leaf.rotation.set(
+                (this.random() - 0.5) * Math.PI,
+                this.random() * Math.PI * 2,
+                (this.random() - 0.5) * Math.PI
+            );
 
-                leaf.rotation.set(
-                    (this.random() - 0.5) * Math.PI * 0.8,
-                    this.random() * Math.PI * 2,
-                    (this.random() - 0.5) * Math.PI * 0.6
-                );
-
-                leaf.castShadow = true;
-                leaf.receiveShadow = true;
-                this.group.add(leaf);
-            }
+            leaf.castShadow = true;
+            leaf.receiveShadow = true;
+            this.group.add(leaf);
         }
     }
 
@@ -343,10 +327,10 @@ class PhotorealisticTree {
     }
 }
 
-// Enhanced forest floor
-function createForestFloor() {
+// Realistic forest floor
+function createRealisticForestFloor() {
     const size = 500;
-    const segments = 140;
+    const segments = 150;
     const geometry = new THREE.PlaneGeometry(size, size, segments, segments);
 
     const positions = geometry.attributes.position;
@@ -357,32 +341,31 @@ function createForestFloor() {
         const z = positions.getZ(i);
 
         let height = 0;
-        height += Math.sin(x * 0.007) * Math.cos(z * 0.007) * 3.5;
-        height += Math.sin(x * 0.025) * Math.cos(z * 0.025) * 1;
-        height += Math.sin(x * 0.1) * Math.cos(z * 0.1) * 0.3;
-        height += (Math.random() - 0.5) * 0.5;
+        height += Math.sin(x * 0.006) * Math.cos(z * 0.006) * 4;
+        height += Math.sin(x * 0.02) * Math.cos(z * 0.02) * 1.2;
+        height += Math.sin(x * 0.08) * Math.cos(z * 0.08) * 0.4;
+        height += (Math.random() - 0.5) * 0.6;
 
         positions.setY(i, height);
 
-        // Rich forest floor colors
         const r = Math.random();
         let color;
 
-        if (r < 0.2) {
-            color = new THREE.Color(0x2a1f15); // Very dark soil
-        } else if (r < 0.4) {
-            color = new THREE.Color(0x3d2f1f); // Dark brown
-        } else if (r < 0.55) {
-            color = new THREE.Color(0x4a3825); // Medium brown
-        } else if (r < 0.7) {
-            color = new THREE.Color(0x354820); // Dark moss
-        } else if (r < 0.85) {
-            color = new THREE.Color(0x5a4a30); // Leaf litter
+        if (r < 0.15) {
+            color = new THREE.Color(0x1a0f08); // Very dark soil
+        } else if (r < 0.35) {
+            color = new THREE.Color(0x2d1f12); // Dark brown
+        } else if (r < 0.5) {
+            color = new THREE.Color(0x3d2f1f); // Medium brown
+        } else if (r < 0.65) {
+            color = new THREE.Color(0x4a3825); // Lighter brown
+        } else if (r < 0.8) {
+            color = new THREE.Color(0x2d3f18); // Dark moss
         } else {
-            color = new THREE.Color(0x3f4f28); // Forest green-brown
+            color = new THREE.Color(0x5a4a30); // Leaf litter
         }
 
-        color.offsetHSL(0, 0, (Math.random() - 0.5) * 0.12);
+        color.offsetHSL(0, 0, (Math.random() - 0.5) * 0.15);
         colors.push(color.r, color.g, color.b);
     }
 
@@ -392,7 +375,7 @@ function createForestFloor() {
 
     const material = new THREE.MeshStandardMaterial({
         vertexColors: true,
-        roughness: 0.95,
+        roughness: 0.98,
         metalness: 0.0
     });
 
@@ -402,51 +385,51 @@ function createForestFloor() {
     scene.add(ground);
 }
 
-// Forest undergrowth
-function createUndergrowth() {
-    // Ferns
-    for (let i = 0; i < 120; i++) {
-        const x = (Math.random() - 0.5) * 400;
-        const z = (Math.random() - 0.5) * 400;
+// Add undergrowth
+function createDetailedUndergrowth() {
+    // More ferns
+    for (let i = 0; i < 150; i++) {
+        const x = (Math.random() - 0.5) * 450;
+        const z = (Math.random() - 0.5) * 450;
         createFern(x, z);
     }
 
-    // Rocks
-    for (let i = 0; i < 70; i++) {
-        const x = (Math.random() - 0.5) * 400;
-        const z = (Math.random() - 0.5) * 400;
+    // More rocks
+    for (let i = 0; i < 100; i++) {
+        const x = (Math.random() - 0.5) * 450;
+        const z = (Math.random() - 0.5) * 450;
         createRock(x, z);
     }
 
-    // Bushes
-    for (let i = 0; i < 90; i++) {
-        const x = (Math.random() - 0.5) * 400;
-        const z = (Math.random() - 0.5) * 400;
+    // More bushes
+    for (let i = 0; i < 120; i++) {
+        const x = (Math.random() - 0.5) * 450;
+        const z = (Math.random() - 0.5) * 450;
         createBush(x, z);
     }
 }
 
 function createFern(x, z) {
     const group = new THREE.Group();
-    const numFronds = 7 + Math.floor(Math.random() * 4);
-
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x1d4a0f,
-        roughness: 0.8,
-        metalness: 0.0,
-        side: THREE.DoubleSide
-    });
+    const numFronds = 8 + Math.floor(Math.random() * 5);
 
     for (let i = 0; i < numFronds; i++) {
         const angle = (i / numFronds) * Math.PI * 2;
-        const length = 1.5 + Math.random();
-        const geometry = new THREE.PlaneGeometry(0.5, length);
-        const frond = new THREE.Mesh(geometry, material);
+        const length = 1.8 + Math.random() * 1.2;
 
-        frond.position.x = Math.cos(angle) * 0.25;
-        frond.position.y = length / 2 + 0.3;
-        frond.position.z = Math.sin(angle) * 0.25;
-        frond.rotation.z = Math.PI / 3.2;
+        const geometry = new THREE.PlaneGeometry(0.6, length);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x1a4510,
+            roughness: 0.85,
+            metalness: 0.0,
+            side: THREE.DoubleSide
+        });
+
+        const frond = new THREE.Mesh(geometry, material);
+        frond.position.x = Math.cos(angle) * 0.3;
+        frond.position.y = length / 2 + 0.4;
+        frond.position.z = Math.sin(angle) * 0.3;
+        frond.rotation.z = Math.PI / 3;
         frond.rotation.y = angle;
         frond.castShadow = true;
 
@@ -458,7 +441,7 @@ function createFern(x, z) {
 }
 
 function createRock(x, z) {
-    const size = 0.5 + Math.random() * 2;
+    const size = 0.6 + Math.random() * 2.5;
     const geometry = new THREE.DodecahedronGeometry(size, 0);
 
     const positions = geometry.attributes.position;
@@ -466,7 +449,7 @@ function createRock(x, z) {
         const px = positions.getX(i);
         const py = positions.getY(i);
         const pz = positions.getZ(i);
-        const noise = 0.7 + Math.random() * 0.6;
+        const noise = 0.65 + Math.random() * 0.7;
         positions.setX(i, px * noise);
         positions.setY(i, py * noise);
         positions.setZ(i, pz * noise);
@@ -474,13 +457,13 @@ function createRock(x, z) {
     geometry.computeVertexNormals();
 
     const material = new THREE.MeshStandardMaterial({
-        color: new THREE.Color(0x3d3d3d).offsetHSL(0, 0, Math.random() * 0.2 - 0.1),
-        roughness: 0.9,
+        color: new THREE.Color(0x3a3a3a).offsetHSL(0, 0, Math.random() * 0.25 - 0.12),
+        roughness: 0.95,
         metalness: 0.0
     });
 
     const rock = new THREE.Mesh(geometry, material);
-    rock.position.set(x, size * 0.4, z);
+    rock.position.set(x, size * 0.45, z);
     rock.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
     rock.castShadow = true;
     rock.receiveShadow = true;
@@ -490,28 +473,26 @@ function createRock(x, z) {
 
 function createBush(x, z) {
     const group = new THREE.Group();
-    const numLeaves = 25 + Math.floor(Math.random() * 20);
-
-    const material = new THREE.MeshStandardMaterial({
-        color: 0x2a5018,
-        roughness: 0.85,
-        metalness: 0.0,
-        side: THREE.DoubleSide
-    });
+    const numLeaves = 30 + Math.floor(Math.random() * 25);
 
     for (let i = 0; i < numLeaves; i++) {
-        const geometry = new THREE.PlaneGeometry(
-            0.35 + Math.random() * 0.35,
-            0.45 + Math.random() * 0.45
-        );
+        const size = 0.4 + Math.random() * 0.4;
+        const geometry = new THREE.PlaneGeometry(size, size * 1.2);
+        const material = new THREE.MeshStandardMaterial({
+            color: 0x2a5018,
+            roughness: 0.9,
+            metalness: 0.0,
+            side: THREE.DoubleSide
+        });
+
         const leaf = new THREE.Mesh(geometry, material);
 
         const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * 0.8;
+        const dist = Math.random() * 0.9;
 
         leaf.position.set(
             Math.cos(angle) * dist,
-            0.4 + Math.random() * 0.7,
+            0.5 + Math.random() * 0.8,
             Math.sin(angle) * dist
         );
 
@@ -530,14 +511,16 @@ function createBush(x, z) {
 }
 
 // Generate forest
-function generateForest() {
+function generateRealisticForest() {
     const treePositions = [];
-    const numTrees = 45;
+    const numTrees = 40;
     const radius = 180;
 
+    console.log('Generating trees with high-quality bark and scattered foliage...');
+
     for (let i = 0; i < numTrees; i++) {
-        const angle = (i / numTrees) * Math.PI * 2 + Math.random() * 1.2;
-        const distance = 20 + Math.random() * radius;
+        const angle = (i / numTrees) * Math.PI * 2 + Math.random() * 1.5;
+        const distance = 25 + Math.random() * radius;
 
         const x = Math.cos(angle) * distance;
         const z = Math.sin(angle) * distance;
@@ -546,7 +529,7 @@ function generateForest() {
         for (const pos of treePositions) {
             const dx = pos.x - x;
             const dz = pos.z - z;
-            if (Math.sqrt(dx * dx + dz * dz) < 15) {
+            if (Math.sqrt(dx * dx + dz * dz) < 18) {
                 tooClose = true;
                 break;
             }
@@ -554,12 +537,13 @@ function generateForest() {
 
         if (!tooClose) {
             treePositions.push({ x, z });
-            const tree = new PhotorealisticTree(x, z, Math.random() * 10000);
+            const tree = new RealisticForestTree(x, z, Math.random() * 10000);
             scene.add(tree.getGroup());
+            console.log(`Tree ${i + 1}/${numTrees} created`);
         }
     }
 
-    createUndergrowth();
+    createDetailedUndergrowth();
 }
 
 // Controls
@@ -658,9 +642,12 @@ function animate() {
 }
 
 // Initialize
-console.log('Creating photorealistic forest...');
-createForestFloor();
-generateForest();
+console.log('=== Creating Photorealistic Forest ===');
+console.log('Resolution: 1024x2048 bark textures');
+console.log('Detail level: 32 segments per trunk');
+console.log('400-700 individual leaves per tree');
+createRealisticForestFloor();
+generateRealisticForest();
 document.getElementById('loading').style.display = 'none';
-console.log('Forest ready! Trees have visible bark and individual leaves.');
+console.log('=== Forest Complete! ===');
 animate();
