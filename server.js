@@ -30,10 +30,15 @@ var server = http.createServer(function (request, response) {
 
 	var contentType = mimeTypes[extname] || 'application/octet-stream';
 
+	// Add charset for text-based files
+	if (extname === '.js' || extname === '.html' || extname === '.css' || extname === '.json') {
+		contentType += '; charset=utf-8';
+	}
+
 	fs.readFile(filePath, function(error, content) {
 		if (error) {
 			if(error.code == 'ENOENT') {
-				response.writeHead(404, { 'Content-Type': 'text/html' });
+				response.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
 				response.end('<h1>404 Not Found</h1>', 'utf-8');
 			}
 			else {
